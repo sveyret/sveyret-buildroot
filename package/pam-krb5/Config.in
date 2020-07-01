@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PAM_KRB5
+	bool "pam-krb5"
+	select BR2_PACKAGE_LIBKRB5
+	select BR2_PACKAGE_LINUX_PAM
+	help
+	  Kerberos V PAM Authentication Module.
+
+	  https://www.eyrie.org/~eagle/software/pam-krb5/

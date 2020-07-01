@@ -1,0 +1,165 @@
+diff -Naur buildroot-2020.05-ref/package/rust-bin/rust-bin.hash buildroot-2020.05/package/rust-bin/rust-bin.hash
+--- buildroot-2020.05-ref/package/rust-bin/rust-bin.hash	2020-06-22 08:28:32.693267437 +0200
++++ buildroot-2020.05/package/rust-bin/rust-bin.hash	2020-06-22 14:23:32.093320558 +0200
+@@ -1,48 +1,33 @@
+-# From https://static.rust-lang.org/dist/rustc-1.33.0-i686-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rustc-1.33.0-i686-unknown-linux-gnu.tar.xz.asc
+-sha256 90b6414eddbce4a245cdcaea8353d3a637ef565d2bd119e25a6c2bf3e38cdf63  rustc-1.33.0-i686-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rustc-1.33.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rustc-1.33.0-x86_64-unknown-linux-gnu.tar.xz.asc
+-sha256 57c5ced1a826d34f26e50adf041528dd0000f2a59e8be32d2359386843382ce1  rustc-1.33.0-x86_64-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-aarch64-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-aarch64-unknown-linux-gnu.tar.xz.asc
+-sha256 3e3449dada8306b3ff91f23c7803c7312a47e93af140f757b29b74f1e226a505  rust-std-1.33.0-aarch64-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-arm-unknown-linux-gnueabi.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-arm-unknown-linux-gnueabi.tar.xz.asc
+-sha256 ddb372a43fb2ba9949e78643df43d6ae447b70cefd440ccdd6b9f6c2ff929ea7  rust-std-1.33.0-arm-unknown-linux-gnueabi.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-arm-unknown-linux-gnueabihf.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-arm-unknown-linux-gnueabihf.tar.xz.asc
+-sha256 1142d5064d8cbfab16ab71130e5a84804a1ebdfeb10173e6238adc0d757937b6  rust-std-1.33.0-arm-unknown-linux-gnueabihf.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-armv7-unknown-linux-gnueabihf.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-armv7-unknown-linux-gnueabihf.tar.xz.asc
+-sha256 8492b5c91a9ea7ee7e22881382c1b9ad8bb9a4147aff0dfee09940b34783e3d5  rust-std-1.33.0-armv7-unknown-linux-gnueabihf.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-i686-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-i686-unknown-linux-gnu.tar.xz.asc
+-sha256 e945dd37ab9b143dbcbcdbeaba63b8de47411a4ff815d2e178f745e183078127  rust-std-1.33.0-i686-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-mips-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-mips-unknown-linux-gnu.tar.xz.asc
+-sha256 abf6b7050c1cdef092ecfde5128067434bb7989def19cfe95c06bfd71de07ba0  rust-std-1.33.0-mips-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-mips64-unknown-linux-gnuabi64.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-mips64-unknown-linux-gnuabi64.tar.xz.asc
+-sha256 9cad816c989c991ffd342d03956b54209d7d32743ebb9b0624b2d36d5bbd525f  rust-std-1.33.0-mips64-unknown-linux-gnuabi64.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-mips64el-unknown-linux-gnuabi64.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-mips64el-unknown-linux-gnuabi64.tar.xz.asc
+-sha256 c7ac98e7a7c3757b5bb8bde596455d50a8787236e290bc1f49e2d59d486ae564  rust-std-1.33.0-mips64el-unknown-linux-gnuabi64.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-mipsel-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-mipsel-unknown-linux-gnu.tar.xz.asc
+-sha256 4ec3cade12e2e527f81d0b315e6a37152bf73938aab4a9216aef7d06ef913eb6  rust-std-1.33.0-mipsel-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc-unknown-linux-gnu.tar.xz.asc
+-sha256 0ab78e0cb710f35d108abce90bbf426947fed6222d2f6c04c9eba4ca00adea06  rust-std-1.33.0-powerpc-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc64-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc64-unknown-linux-gnu.tar.xz.asc
+-sha256 4bc32bf4660a9fc5cd2af9e09f1bfb668b335442097fed6f3892b50950e97d3c  rust-std-1.33.0-powerpc64-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc64le-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-powerpc64le-unknown-linux-gnu.tar.xz.asc
+-sha256 984d3ca2a47db04345a2bddd657761f66d209ef95a02097ad4bd549f45a0dc9f  rust-std-1.33.0-powerpc64le-unknown-linux-gnu.tar.xz
+-# From https://static.rust-lang.org/dist/rust-std-1.33.0-x86_64-unknown-linux-gnu.tar.xz.sha256
+-# Verified using https://static.rust-lang.org/dist/rust-std-1.33.0-x86_64-unknown-linux-gnu.tar.xz.asc
+-sha256 6f20343ed73faf5fdfc423bec38a9bb1910a0a962af6f2dddd7184407543ed0e  rust-std-1.33.0-x86_64-unknown-linux-gnu.tar.xz
+-# Locally generated
++# From https://static.rust-lang.org/dist/rust-1.44.1-i686-unknown-linux-gnu.tar.xz.sha256
++sha256 6b66841e041174bcefcfed9110cf787eae62ff8c07438b6bb081b832a2419513  rust-1.44.1-i686-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-1.44.1-x86_64-unknown-linux-gnu.tar.xz.sha256
++sha256 aa813a36f9ed0b9886c9555140e9163f565c532e541a28f8bd69288f7e4f0ff5  rust-1.44.1-x86_64-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-aarch64-unknown-linux-gnu.tar.xz.sha256
++sha256 1aed1e3c7031b0ecd2237e8b1ff4269fca5b33e0eafb395e3900adb5ca0bb6b7  rust-std-1.44.1-aarch64-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-arm-unknown-linux-gnueabi.tar.xz.sha256
++sha256 06c381a9ec8b7b0a66ca00dc814b11ed03446fbac1cc7da61337091b9ff7968b  rust-std-1.44.1-arm-unknown-linux-gnueabi.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-arm-unknown-linux-gnueabihf.tar.xz.sha256
++sha256 bff72ee4d0b0e721c1baebae1362f53071700b6462d91f8397589c8a7144de1f  rust-std-1.44.1-arm-unknown-linux-gnueabihf.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-armv7-unknown-linux-gnueabihf.tar.xz.sha256
++sha256 e3e7b942876c37121f5f875313691bd5f1b26ca81c657dfd6f31e031fe977d84  rust-std-1.44.1-armv7-unknown-linux-gnueabihf.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-i686-unknown-linux-gnu.tar.xz.sha256
++sha256 c949ecf87db65cdfdfc61f9b6c4fc48982b9a9727b4551a34c79212bd9e6eb23  rust-std-1.44.1-i686-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-mips-unknown-linux-gnu.tar.xz.sha256
++sha256 33202ed5ee1046c4f527bdff6d912f72700589671d21c6449b6898c7de1dfd9d  rust-std-1.44.1-mips-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-mips64-unknown-linux-gnuabi64.tar.xz.sha256
++sha256 f5dd3f73637436614816f7cc366120c1d2f1e9ca730fc19204bfd4c37f956e20  rust-std-1.44.1-mips64-unknown-linux-gnuabi64.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-mips64el-unknown-linux-gnuabi64.tar.xz.sha256
++sha256 953ca6a977f9aeb42182e21484c67e03ed640c69c0dc627a0c7be58d12109d5c  rust-std-1.44.1-mips64el-unknown-linux-gnuabi64.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-mipsel-unknown-linux-gnu.tar.xz.sha256
++sha256 108ea039092b3ec6777f94dcf6aef0e38c6a01a235845b19a45a3b295b357ea4  rust-std-1.44.1-mipsel-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-powerpc-unknown-linux-gnu.tar.xz.sha256
++sha256 9d75aa239ce4801e1c0349812b3ce265e27b9de3a841da98a2443bd3e2f8da15  rust-std-1.44.1-powerpc-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-powerpc64-unknown-linux-gnu.tar.xz.sha256
++sha256 5b1f156e244973a3aaa182efee3a8579bb5611b68b186cb691e0fa8fb0cbaf92  rust-std-1.44.1-powerpc64-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-powerpc64le-unknown-linux-gnu.tar.xz.sha256
++sha256 91b696f79eb38356acf1381711bfa90028b0e7bbf0f96a7846444800a6b28ec7  rust-std-1.44.1-powerpc64le-unknown-linux-gnu.tar.xz
++# From https://static.rust-lang.org/dist/rust-std-1.44.1-x86_64-unknown-linux-gnu.tar.xz.sha256
++sha256 36059ac75bb226e72e882f5830379b7d31d4ecc0da0cf69df2ddc3441c26eb58  rust-std-1.44.1-x86_64-unknown-linux-gnu.tar.xz
++# From buildroot provided 1.33 version
+ sha256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2  LICENSE-APACHE
+ sha256 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3  LICENSE-MIT
+diff -Naur buildroot-2020.05-ref/package/rust-bin/rust-bin.mk buildroot-2020.05/package/rust-bin/rust-bin.mk
+--- buildroot-2020.05-ref/package/rust-bin/rust-bin.mk	2020-06-22 08:28:32.693267437 +0200
++++ buildroot-2020.05/package/rust-bin/rust-bin.mk	2020-06-22 17:28:37.222740239 +0200
+@@ -4,33 +4,25 @@
+ #
+ ################################################################################
+ 
+-RUST_BIN_VERSION = 1.33.0
++RUST_BIN_VERSION = 1.44.1
+ RUST_BIN_SITE = https://static.rust-lang.org/dist
+ RUST_BIN_LICENSE = Apache-2.0 or MIT
+ RUST_BIN_LICENSE_FILES = LICENSE-APACHE LICENSE-MIT
+ 
+ HOST_RUST_BIN_PROVIDES = host-rustc
+ 
+-HOST_RUST_BIN_SOURCE = rustc-$(RUST_BIN_VERSION)-$(RUSTC_HOST_NAME).tar.xz
+-
+-HOST_RUST_BIN_EXTRA_DOWNLOADS = \
+-	rust-std-$(RUST_BIN_VERSION)-$(RUSTC_HOST_NAME).tar.xz
++HOST_RUST_BIN_SOURCE = rust-$(RUST_BIN_VERSION)-$(RUSTC_HOST_NAME).tar.xz
+ 
+ ifeq ($(BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS),y)
+ HOST_RUST_BIN_EXTRA_DOWNLOADS += rust-std-$(RUST_BIN_VERSION)-$(RUSTC_TARGET_NAME).tar.xz
+ endif
+ 
+-HOST_RUST_BIN_LIBSTD_HOST_PREFIX = rust-std-$(RUST_BIN_VERSION)-$(RUSTC_HOST_NAME)/rust-std-$(RUSTC_HOST_NAME)
+-
+ define HOST_RUST_BIN_LIBSTD_EXTRACT
+-	mkdir -p $(@D)/std
+-	$(foreach f,$(HOST_RUST_BIN_EXTRA_DOWNLOADS), \
+-		$(call suitable-extractor,$(f)) $(HOST_RUST_BIN_DL_DIR)/$(f) | \
+-			$(TAR) -C $(@D)/std $(TAR_OPTIONS) -
+-	)
+-	mkdir -p $(@D)/rustc/lib/rustlib/$(RUSTC_HOST_NAME)/lib
+-	cd $(@D)/rustc/lib/rustlib/$(RUSTC_HOST_NAME)/lib; \
+-		ln -sf ../../../../../std/$(HOST_RUST_BIN_LIBSTD_HOST_PREFIX)/lib/rustlib/$(RUSTC_HOST_NAME)/lib/* .
++       mkdir -p $(@D)/std
++       $(foreach f,$(HOST_RUST_BIN_EXTRA_DOWNLOADS), \
++               $(call suitable-extractor,$(f)) $(HOST_RUST_BIN_DL_DIR)/$(f) | \
++                       $(TAR) -C $(@D)/std $(TAR_OPTIONS) -
++       )
+ endef
+ 
+ HOST_RUST_BIN_POST_EXTRACT_HOOKS += HOST_RUST_BIN_LIBSTD_EXTRACT
+@@ -41,12 +33,8 @@
+ 
+ define HOST_RUST_BIN_INSTALL_RUSTC
+ 	(cd $(@D); \
+-		./install.sh $(HOST_RUST_BIN_INSTALL_OPTS))
+-endef
+-
+-define HOST_RUST_BIN_INSTALL_LIBSTD_HOST
+-	(cd $(@D)/std/rust-std-$(RUST_BIN_VERSION)-$(RUSTC_HOST_NAME); \
+-		./install.sh $(HOST_RUST_BIN_INSTALL_OPTS))
++		./install.sh $(HOST_RUST_BIN_INSTALL_OPTS) \
++		--components=rustc,cargo,rust-std-$(RUSTC_HOST_NAME))
+ endef
+ 
+ ifeq ($(BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS),y)
+@@ -56,10 +44,21 @@
+ endef
+ endif
+ 
++# Should be in a better place
++CARGO_HOME = $(HOST_DIR)/share/cargo
++
++define HOST_RUST_BIN_INSTALL_CARGO_CONFIG
++	mkdir -p $(CARGO_HOME)
++	( \
++		echo "[target.$(RUSTC_TARGET_NAME)]"; \
++		echo "linker = \"$(notdir $(TARGET_CROSS))gcc\""; \
++	) > $(CARGO_HOME)/config
++endef
++
+ define HOST_RUST_BIN_INSTALL_CMDS
+ 	$(HOST_RUST_BIN_INSTALL_RUSTC)
+-	$(HOST_RUST_BIN_INSTALL_LIBSTD_HOST)
+ 	$(HOST_RUST_BIN_INSTALL_LIBSTD_TARGET)
++	$(HOST_RUST_BIN_INSTALL_CARGO_CONFIG)
+ endef
+ 
+ $(eval $(host-generic-package))

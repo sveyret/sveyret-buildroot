@@ -1,0 +1,6 @@
+menu "Target packages"
+
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/duniter/Config.in"
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/pam-krb5/Config.in"
+
+endmenu

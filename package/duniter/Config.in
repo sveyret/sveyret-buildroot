@@ -1,0 +1,24 @@
+comment "duniter needs nodejs"
+	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+	depends on !BR2_PACKAGE_NODEJS
+
+config BR2_PACKAGE_DUNITER
+	bool "duniter"
+	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+	depends on BR2_PACKAGE_NODEJS
+	select BR2_PACKAGE_HOST_RUSTC
+	help
+	  Crypto-currency software to manage libre currency. This
+	  package currently only installs the server.
+
+	  https://duniter.org/
+
+if BR2_PACKAGE_DUNITER
+
+config BR2_PACKAGE_DUNITER_GUI
+	bool "GUI"
+	default y
+	help
+	  Select this if you want to install the GUI.
+
+endif

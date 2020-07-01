@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# Start/stop duniter
+#
+
+NAME="duniter"
+DAEMON="/usr/bin/${NAME}"
+DAEMON_ARGS=""
+CFG_FILE="/etc/default/${NAME}.conf"
+PID_FILE="/var/run/${NAME}.pid"
+
+DUNITER_GROUP=duniter
+DUNITER_USER=duniter
+DUNITER_HOME=/var/lib/duniter/.config/duniter
+DUNITER_DATA=duniter_default
+
+# Read configuration variable file if it is present
+[ -r "${CFG_FILE}" ] && . "${CFG_FILE}"
+
+command="/usr/bin/duniter"
+if [ -n "${DUNITER_WEB}" ]; then
+	command_args="webstart"
+	if [ ! -z ${DUNITER_WEB_HOST} ]; then
+		command_args="${command_args} --webmhost \"${DUNITER_WEB_HOST}\""
+	fi
+	if [ ! -z ${DUNITER_WEB_PORT} ]; then
+		command_args="${command_args} --webmport \"${DUNITER_WEB_PORT}\""
+	fi
+else
+	command_args="start"
+fi
+if [ ! -z ${DUNITER_KEYS} ] && [ -r ${DUNITER_KEYS} ]; then
+	command_args="${command_args} --keyfile \"${DUNITER_KEYS}\""
+fi
+command_args="${command_args} --home \"${DUNITER_HOME}\" --mdb \"${DUNITER_DATA}\""
+start_stop_daemon_args="-c \"${DUNITER_USER}\":\"${DUNITER_GROUP}\" ${DUNITER_SSD_OPTIONS}"
+
+case "$1" in
+  start)
+	echo "Starting duniter..."
+	eval start-stop-daemon -S ${start_stop_daemon_args} -x "'${DAEMON}'" -p "'${PID_FILE}'" -- ${command_args}
+	;;
+  stop)
+	echo "Stopping duniter..."
+	${command} stop --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}"
+	rm "${PID_FILE}"
+	;;
+  restart)
+	"$0" stop
+	"$0" start
+	;;
+  *)
+	${command} "${1}" --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}"
+esac
