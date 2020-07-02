@@ -50,6 +50,14 @@ Ces correctifs se trouvent à la racine de cette surcouche (par exemple `/path/t
 
 :pill: **Warning:** requires `rust-update.patch`.
 
+## gecogvidanto
+
+:ticket: ĞecoĞvidanto
+
+:speech_balloon: A tool to help game masters of the Ğeconomicus game.
+
+:link: https://git.duniter.org/gecogvidanto/gecogvidanto
+
 ## pam-krb5
 
 :ticket: Kerberos V PAM

@@ -1,0 +1,38 @@
+comment "gecogvidanto needs nodejs"
+	depends on !BR2_PACKAGE_NODEJS
+
+config BR2_PACKAGE_GECOGVIDANTO
+	bool "gecogvidanto"
+	depends on BR2_PACKAGE_NODEJS
+	help
+	  A tool to help game masters of the Ğeconomicus game.
+
+	  https://git.duniter.org/gecogvidanto/gecogvidanto
+
+if BR2_PACKAGE_GECOGVIDANTO
+
+comment "Additional systems"
+
+config BR2_PACKAGE_GECOGVIDANTO_BARTER
+	bool "Barter"
+	help
+	  Adds the ability to play sets with barter economic system.
+
+config BR2_PACKAGE_GECOGVIDANTO_MUTCREDIT
+	bool "Mutual credit"
+	help
+	  Adds the ability to play sets with mutual credit economic system.
+
+comment "Additional locales"
+
+config BR2_PACKAGE_GECOGVIDANTO_LOCALE_EO
+	bool "Esperanto"
+	help
+	  Adds the esperanto language to the server.
+
+config BR2_PACKAGE_GECOGVIDANTO_LOCALE_FR
+	bool "French"
+	help
+	  Adds the french language to the server.
+
+endif

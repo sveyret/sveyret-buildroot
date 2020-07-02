@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Start/stop gecogvidanto
+#
+
+DAEMON=/usr/bin/node
+PID_FILE=/run/gecogvidanto.pid
+DAEMON_USER=gecogvidanto:gecogvidanto
+
+case "$1" in
+	start)
+		printf "Starting gecogvidanto: "
+		cd /var/db/gecogvidanto
+		start-stop-daemon -S -q -c ${DAEMON_USER} -m -p ${PID_FILE} -b \
+			-a /bin/sh -- -c "exec env NODE_ENV=production ${DAEMON} /opt/gecogvidanto"
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf "Stopping gecogvidanto: "
+		start-stop-daemon -K -x ${DAEMON} -p ${PID_FILE} -s INT -o
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	restart)
+		"$0" stop
+		sleep 1
+		"$0" start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
