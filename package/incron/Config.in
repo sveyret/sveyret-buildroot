@@ -1,0 +1,7 @@
+config BR2_PACKAGE_INCRON
+	bool "incron"
+	depends on BR2_PACKAGE_NODEJS
+	help
+	  Cron-like daemon which handles filesystem events.
+
+	  https://github.com/ar-/incron

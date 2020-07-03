@@ -58,6 +58,14 @@ Ces correctifs se trouvent à la racine de cette surcouche (par exemple `/path/t
 
 :link: https://git.duniter.org/gecogvidanto/gecogvidanto
 
+## incron
+
+:ticket: incron
+
+:speech_balloon: Cron-like daemon which handles filesystem events.
+
+:link: https://github.com/ar-/incron
+
 ## pam-krb5
 
 :ticket: Kerberos V PAM
