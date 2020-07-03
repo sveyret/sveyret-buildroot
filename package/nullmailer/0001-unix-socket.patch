@@ -1,0 +1,469 @@
+diff -Naur a/doc/nullmailer-send.8 b/doc/nullmailer-send.8
+--- a/doc/nullmailer-send.8	2020-07-03 11:46:59.349810189 +0200
++++ b/doc/nullmailer-send.8	2020-07-03 11:47:10.375650356 +0200
+@@ -134,6 +134,15 @@
+ .BI source= HOSTNAME
+ Set the source address for connections to the remote host.
+ .TP
++.BI unix-socket=\fISOCKETNAME
++Set the unix socket to connect to. When this option is set, neither
++.B port
++nor
++.B source
++can be used, and
++.B hostname
++is ignored.
++.TP
+ .B auth-login
+ Force SMTP "AUTH LOGIN" mode instead of auto-detecting.
+ .TP
+diff -Naur a/lib/connect.h b/lib/connect.h
+--- a/lib/connect.h	2020-07-03 11:46:59.348810203 +0200
++++ b/lib/connect.h	2020-07-03 11:47:10.376650342 +0200
+@@ -2,5 +2,6 @@
+ #define NULLMAILER_CONNECT__H__
+ 
+ extern int tcpconnect(const char* hostname, int port, const char* source);
++extern int unixconnect(const char* unix_socket);
+ 
+ #endif // NULLMAILER_CONNECT__H__
+diff -Naur a/lib/Makefile.am b/lib/Makefile.am
+--- a/lib/Makefile.am	2020-07-03 11:46:59.348810203 +0200
++++ b/lib/Makefile.am	2020-07-03 11:47:10.375650356 +0200
+@@ -13,7 +13,7 @@
+ 	canonicalize.h canonicalize.cc \
+ 	configio.h config_path.cc \
+ 	config_read.cc config_readlist.cc config_readint.cc config_syserr.cc \
+-	connect.h tcpconnect.cc \
++	connect.h socketconnect.cc \
+ 	defines.h \
+ 	errcodes.h errcodes.cc \
+ 	hostname.h hostname.cc \
+diff -Naur a/lib/socketconnect.cc b/lib/socketconnect.cc
+--- a/lib/socketconnect.cc	1970-01-01 01:00:00.000000000 +0100
++++ b/lib/socketconnect.cc	2020-07-03 11:47:10.377650327 +0200
+@@ -0,0 +1,192 @@
++// nullmailer -- a simple relay-only MTA
++// Copyright (C) 2018  Bruce Guenter <bruce@untroubled.org>
++//
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 2 of the License, or
++// (at your option) any later version.
++//
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with this program; if not, write to the Free Software
++// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++//
++// You can contact me at <bruce@untroubled.org>.  There is also a mailing list
++// available to discuss this package.  To subscribe, send an email to
++// <nullmailer-subscribe@lists.untroubled.org>.
++
++#include "config.h"
++#include <errno.h>
++#include <netdb.h>
++#include <string.h>
++#include <sys/types.h>
++#include <sys/un.h>
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <unistd.h>
++#include "errcodes.h"
++#include "itoa.h"
++#include "connect.h"
++
++static int err_return(int errn, int dflt)
++{
++  if (errn == HOST_NOT_FOUND)
++    return -ERR_HOST_NOT_FOUND;
++  if (errn == NO_ADDRESS)
++    return -ERR_NO_ADDRESS;
++  if (errn == NO_RECOVERY || errn == EAI_FAIL)
++    return -ERR_GHBN_FATAL;
++  if (errn == TRY_AGAIN || errn == EAI_AGAIN)
++    return -ERR_GHBN_TEMP;
++  if (errn == EAI_NONAME)
++    return -ERR_HOST_NOT_FOUND;
++  if (errn == ECONNREFUSED)
++    return -ERR_CONN_REFUSED;
++  if (errn == ETIMEDOUT)
++    return -ERR_CONN_TIMEDOUT;
++  if (errn == ENETUNREACH)
++    return -ERR_CONN_UNREACHABLE;
++  return -dflt;
++}
++
++#ifdef HAVE_GETADDRINFO
++
++static int getaddr(const char* hostname, int port, struct addrinfo** result)
++{
++  const char *service = itoa(port, 6);
++  struct addrinfo req;
++  memset(&req, 0, sizeof(req));
++  req.ai_flags = AI_NUMERICSERV;
++  req.ai_socktype = SOCK_STREAM;
++  int e = getaddrinfo(hostname, service, &req, result);
++  return e ? err_return(e, ERR_GHBN_TEMP) : 0;
++}
++
++static bool canbind(int family, const struct addrinfo* ai)
++{
++  for (; ai; ai = ai->ai_next)
++    if (ai->ai_family == family)
++      return true;
++  return false;
++}
++
++static bool bindit(int fd, int family, const struct addrinfo* ai)
++{
++  for (; ai; ai = ai->ai_next)
++    if (ai->ai_family == family)
++      if (bind(fd, ai->ai_addr, ai->ai_addrlen) == 0)
++        return true;
++  return false;
++}
++
++int tcpconnect(const char* hostname, int port, const char* source)
++{
++  struct addrinfo* res;
++  int err = getaddr(hostname, port, &res);
++  if (err)
++    return err;
++  struct addrinfo* source_addr = NULL;
++  if (source) {
++    err = getaddr(source, 0, &source_addr);
++    if (err)
++      return err;
++  }
++  int s = -1;
++  err = ERR_CONN_FAILED;
++  struct addrinfo* orig_res = res;
++
++  if (source_addr)
++    // Check if some address is the same family as the source
++    for (; res != NULL; res = res->ai_next)
++      if (canbind(res->ai_family, source_addr))
++        break;
++  if (res == NULL)
++    return -ERR_BIND_FAILED;
++
++  for (; res != NULL; res = res->ai_next) {
++    if (!source_addr || canbind(res->ai_family, source_addr)) {
++      s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
++      if(s > 0) {
++        if(source_addr && !bindit(s, res->ai_family, source_addr)) {
++          close(s);
++          err = ERR_BIND_FAILED;
++          s = -1;
++          break;
++        }
++        if(connect(s, res->ai_addr, res->ai_addrlen) == 0)
++          break;
++        close(s);
++        s = -1;
++      }
++    }
++  }
++
++  freeaddrinfo(orig_res);
++  if (source_addr)
++    freeaddrinfo(source_addr);
++
++  if(s < 0)
++    return err_return(errno, err);
++  return s;
++}
++
++#else
++
++static int sethostbyname(const char* hostname, struct sockaddr_in& sa)
++{
++  struct hostent *he = gethostbyname(hostname);
++  if(!he)
++    return err_return(h_errno, ERR_GHBN_TEMP);
++  memcpy(&sa.sin_addr, he->h_addr, he->h_length);
++  return 0;
++}
++
++int tcpconnect(const char* hostname, int port, const char* source)
++{
++  struct sockaddr_in sa;
++  memset(&sa, 0, sizeof(sa));
++  int e = sethostbyname(hostname, sa);
++  if(e) return e;
++  struct sockaddr_in source_sa;
++  memset(&source_sa, 0, sizeof source_sa);
++  if(source) {
++    e = sethostbyname(source, source_sa);
++    if(e) return e;
++  }
++  sa.sin_family = AF_INET;
++  sa.sin_port = htons(port);
++  int s = socket(PF_INET, SOCK_STREAM, 0);
++  if(s == -1)
++    return -ERR_SOCKET;
++  if(source && bind(s, (sockaddr*)&source_sa, sizeof source_sa) != 0) {
++    close(s);
++    return err_return(errno, ERR_BIND_FAILED);
++  }
++  if(connect(s, (sockaddr*)&sa, sizeof(sa)) != 0) {
++    close(s);
++    return err_return(errno, ERR_CONN_FAILED);
++  }
++  return s;
++}
++
++#endif
++
++int unixconnect(const char* unix_socket)
++{
++  struct sockaddr_un sa;
++  memset(&sa, 0, sizeof(sa));
++  sa.sun_family = AF_UNIX;
++  strncpy(sa.sun_path, unix_socket, sizeof(sa.sun_path) - 1);
++  int s = socket(PF_UNIX, SOCK_STREAM, 0);
++  if(s == -1)
++    return -ERR_SOCKET;
++  if(connect(s, (sockaddr*)&sa, sizeof(sa)) != 0) {
++    close(s);
++    return err_return(errno, ERR_CONN_FAILED);
++  }
++  return s;
++}
+diff -Naur a/lib/tcpconnect.cc b/lib/tcpconnect.cc
+--- a/lib/tcpconnect.cc	2020-07-03 11:46:59.341810305 +0200
++++ b/lib/tcpconnect.cc	1970-01-01 01:00:00.000000000 +0100
+@@ -1,175 +0,0 @@
+-// nullmailer -- a simple relay-only MTA
+-// Copyright (C) 2018  Bruce Guenter <bruce@untroubled.org>
+-//
+-// This program is free software; you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License as published by
+-// the Free Software Foundation; either version 2 of the License, or
+-// (at your option) any later version.
+-//
+-// This program is distributed in the hope that it will be useful,
+-// but WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-// GNU General Public License for more details.
+-//
+-// You should have received a copy of the GNU General Public License
+-// along with this program; if not, write to the Free Software
+-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-//
+-// You can contact me at <bruce@untroubled.org>.  There is also a mailing list
+-// available to discuss this package.  To subscribe, send an email to
+-// <nullmailer-subscribe@lists.untroubled.org>.
+-
+-#include "config.h"
+-#include <errno.h>
+-#include <netdb.h>
+-#include <string.h>
+-#include <sys/types.h>
+-#include <sys/socket.h>
+-#include <netinet/in.h>
+-#include <unistd.h>
+-#include "errcodes.h"
+-#include "itoa.h"
+-#include "connect.h"
+-
+-static int err_return(int errn, int dflt)
+-{
+-  if (errn == HOST_NOT_FOUND)
+-    return -ERR_HOST_NOT_FOUND;
+-  if (errn == NO_ADDRESS)
+-    return -ERR_NO_ADDRESS;
+-  if (errn == NO_RECOVERY || errn == EAI_FAIL)
+-    return -ERR_GHBN_FATAL;
+-  if (errn == TRY_AGAIN || errn == EAI_AGAIN)
+-    return -ERR_GHBN_TEMP;
+-  if (errn == EAI_NONAME)
+-    return -ERR_HOST_NOT_FOUND;
+-  if (errn == ECONNREFUSED)
+-    return -ERR_CONN_REFUSED;
+-  if (errn == ETIMEDOUT)
+-    return -ERR_CONN_TIMEDOUT;
+-  if (errn == ENETUNREACH)
+-    return -ERR_CONN_UNREACHABLE;
+-  return -dflt;
+-}
+-
+-#ifdef HAVE_GETADDRINFO
+-
+-static int getaddr(const char* hostname, int port, struct addrinfo** result)
+-{
+-  const char *service = itoa(port, 6);
+-  struct addrinfo req;
+-  memset(&req, 0, sizeof(req));
+-  req.ai_flags = AI_NUMERICSERV;
+-  req.ai_socktype = SOCK_STREAM;
+-  int e = getaddrinfo(hostname, service, &req, result);
+-  return e ? err_return(e, ERR_GHBN_TEMP) : 0;
+-}
+-
+-static bool canbind(int family, const struct addrinfo* ai)
+-{
+-  for (; ai; ai = ai->ai_next)
+-    if (ai->ai_family == family)
+-      return true;
+-  return false;
+-}
+-
+-static bool bindit(int fd, int family, const struct addrinfo* ai)
+-{
+-  for (; ai; ai = ai->ai_next)
+-    if (ai->ai_family == family)
+-      if (bind(fd, ai->ai_addr, ai->ai_addrlen) == 0)
+-        return true;
+-  return false;
+-}
+-
+-int tcpconnect(const char* hostname, int port, const char* source)
+-{
+-  struct addrinfo* res;
+-  int err = getaddr(hostname, port, &res);
+-  if (err)
+-    return err;
+-  struct addrinfo* source_addr = NULL;
+-  if (source) {
+-    err = getaddr(source, 0, &source_addr);
+-    if (err)
+-      return err;
+-  }
+-  int s = -1;
+-  err = ERR_CONN_FAILED;
+-  struct addrinfo* orig_res = res;
+-
+-  if (source_addr)
+-    // Check if some address is the same family as the source
+-    for (; res != NULL; res = res->ai_next)
+-      if (canbind(res->ai_family, source_addr))
+-        break;
+-  if (res == NULL)
+-    return -ERR_BIND_FAILED;
+-
+-  for (; res != NULL; res = res->ai_next) {
+-    if (!source_addr || canbind(res->ai_family, source_addr)) {
+-      s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+-      if(s > 0) {
+-        if(source_addr && !bindit(s, res->ai_family, source_addr)) {
+-          close(s);
+-          err = ERR_BIND_FAILED;
+-          s = -1;
+-          break;
+-        }
+-        if(connect(s, res->ai_addr, res->ai_addrlen) == 0)
+-          break;
+-        close(s);
+-        s = -1;
+-      }
+-    }
+-  }
+-
+-  freeaddrinfo(orig_res);
+-  if (source_addr)
+-    freeaddrinfo(source_addr);
+-
+-  if(s < 0)
+-    return err_return(errno, err);
+-  return s;
+-}
+-
+-#else
+-
+-static int sethostbyname(const char* hostname, struct sockaddr_in& sa)
+-{
+-  struct hostent *he = gethostbyname(hostname);
+-  if(!he)
+-    return err_return(h_errno, ERR_GHBN_TEMP);
+-  memcpy(&sa.sin_addr, he->h_addr, he->h_length);
+-  return 0;
+-}
+-
+-int tcpconnect(const char* hostname, int port, const char* source)
+-{
+-  struct sockaddr_in sa;
+-  memset(&sa, 0, sizeof(sa));
+-  int e = sethostbyname(hostname, sa);
+-  if(e) return e;
+-  struct sockaddr_in source_sa;
+-  memset(&source_sa, 0, sizeof source_sa);
+-  if(source) {
+-    e = sethostbyname(source, source_sa);
+-    if(e) return e;
+-  }
+-  sa.sin_family = AF_INET;
+-  sa.sin_port = htons(port);
+-  int s = socket(PF_INET, SOCK_STREAM, 0);
+-  if(s == -1)
+-    return -ERR_SOCKET;
+-  if(source && bind(s, (sockaddr*)&source_sa, sizeof source_sa) != 0) {
+-    close(s);
+-    return err_return(errno, ERR_BIND_FAILED);
+-  }
+-  if(connect(s, (sockaddr*)&sa, sizeof(sa)) != 0) {
+-    close(s);
+-    return err_return(errno, ERR_CONN_FAILED);
+-  }
+-  return s;
+-}
+-
+-#endif
+diff -Naur a/protocols/protocol.cc b/protocols/protocol.cc
+--- a/protocols/protocol.cc	2020-07-03 11:46:59.350810174 +0200
++++ b/protocols/protocol.cc	2020-07-03 11:47:10.378650313 +0200
+@@ -35,6 +35,7 @@
+ int auth_method = AUTH_DETECT;
+ int use_tls = 0;
+ int use_starttls = 0;
++const char* unix_socket = 0;
+ const char* remote = 0;
+ const char* source = 0;
+ const char* cli_help_suffix = "";
+@@ -42,6 +43,8 @@
+ const int cli_args_min = 0;
+ const int cli_args_max = 0;
+ cli_option cli_options[] = {
++  { 0, "unix-socket", cli_option::string, 0, &unix_socket,
++    "Set the path to the unix socket for the remote", 0 },
+   { 0, "host", cli_option::string, 0, &remote,
+     "Set the hostname for the remote", 0 },
+   { 'p', "port", cli_option::integer, 0, &port,
+@@ -134,17 +137,23 @@
+ int cli_main(int, char*[])
+ {
+   parse_options();
+-  if (remote == 0)
+-    protocol_fail(ERR_USAGE, "Remote host not set");
+-  if (port == 0)
+-    port = use_tls ? default_tls_port : default_port;
+-  if (port < 0)
+-    protocol_fail(ERR_USAGE, "Invalid value for port");
+-  if (use_tls || use_starttls)
+-    tls_init(remote);
++  if (unix_socket == 0) {
++    if (remote == 0)
++      protocol_fail(ERR_USAGE, "Remote host not set");
++    if (port == 0)
++      port = use_tls ? default_tls_port : default_port;
++    if (port < 0)
++      protocol_fail(ERR_USAGE, "Invalid value for port");
++    if (use_tls || use_starttls)
++      tls_init(remote);
++  }
++  else if (port != 0 || source != 0)
++    protocol_fail(ERR_USAGE, "Both INET and UNIX socket specified");
+   fdibuf in(3, true);
+   protocol_prep(in);
+-  int fd = tcpconnect(remote, port, source);
++  int fd = unix_socket == 0
++    ? tcpconnect(remote, port, source)
++    : unixconnect(unix_socket);
+   if(fd < 0)
+     protocol_fail(-fd, "Connect failed");
+   if (use_tls)

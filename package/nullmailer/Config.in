@@ -1,0 +1,6 @@
+config BR2_PACKAGE_NULLMAILER
+	bool "nullmailer"
+	help
+	  Simple relay-only mail transport agent.
+
+	  http://untroubled.org/nullmailer/
