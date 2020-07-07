@@ -66,6 +66,12 @@ Ces correctifs se trouvent à la racine de cette surcouche (par exemple `/path/t
 
 :link: https://github.com/ar-/incron
 
+## init-rootfs-rotate
+
+:ticket: Root FS rotation initramfs
+
+:speech_balloon: An initramfs which can replace the root FS if a new one is provided.
+
 ## nullmailer
 
 :ticket: nullmailer

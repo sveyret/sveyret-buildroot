@@ -1,0 +1,14 @@
+config BR2_LINUX_KERNEL_EXT_INIT_ROOTFS_ROTATE
+	bool "Root FS rotation initramfs"
+	select BR2_PACKAGE_INIT_ROOTFS_ROTATE
+	help
+	  Build an initramfs managing root FS rotation. This initramfs
+	  will create an overlay FS based on a /rootfs.squashfs as lower
+	  directory, /upper as upper directory and /work as work directory.
+	  This overlay FS will be the visible root FS for the system.
+
+	  You can specify the name of a new root FS in the kernel command
+	  line using new_root=new.rootfs. If a file with this name exists
+	  in the root of the real root filesystem, a rotation is done
+	  before overlay FS creation, i.e. the /rootfs.squashfs is deleted
+	  and replaced with /new.rootfs.
