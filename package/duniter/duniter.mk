@@ -76,15 +76,15 @@ endef
 
 define DUNITER_INSTALL_INIT_SYSTEMD
 	$(INSTALL) -m 0644 $(@D)/work-extra/systemd/duniter.service \
-		$(TARGET_DIR)/usr/lib/sysusers.d/duniter.conf
+		$(TARGET_DIR)/usr/lib/systemd/system/duniter.service
 endef
 
 define DUNITER_USERS
-	duniter -1 duniter -1 * /var/lib/duniter - - User created for duniter
+	duniter -1 duniter -1 * /var/db/duniter - - User created for duniter
 endef
 
 define DUNITER_PERMISSIONS
-	/var/lib/duniter  d  755  duniter  duniter  -  -  -  -  -
+	/var/db/duniter  d  755  duniter  duniter  -  -  -  -  -
 endef
 
 $(eval $(generic-package))

@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Start/stop incron
+#
+
+NAME="incron"
+DAEMON="/usr/sbin/${NAME}d"
+CFG_FILE="/etc/default/${NAME}d.conf"
+PID_FILE="/var/run/${NAME}d.pid"
+SSDARGS=
+STARTWAIT=1
+
+INCROND_OPTS=""
+INCROND_CONFFILE="/etc/${NAME}.conf"
+
+# Read configuration variable file if it is present
+[ -r "${CFG_FILE}" ] && . "${CFG_FILE}"
+
+case "$1" in
+	start)
+		printf "Starting incron: "
+		sleep ${STARTWAIT}
+		eval start-stop-daemon -S ${SSDARGS} -x "'${DAEMON}'" -p "'${PID_FILE}'" -- "${INCROND_OPTS}" -f "'${INCROND_CONFFILE}'"
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf "Stopping incron: "
+		start-stop-daemon -K -x "${DAEMON}" -p "${PID_FILE}" -o
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	restart)
+		"$0" stop
+		sleep 1
+		"$0" start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

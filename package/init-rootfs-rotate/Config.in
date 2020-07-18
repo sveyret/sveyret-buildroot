@@ -1,0 +1,3 @@
+config BR2_PACKAGE_INIT_ROOTFS_ROTATE
+	bool
+	depends on BR2_LINUX_KERNEL

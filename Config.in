@@ -1,6 +1,16 @@
+menu "Kernel"
+
+source "$BR2_EXTERNAL_SVEYRET_PATH/linux/Config.ext.in"
+
+endmenu
+
 menu "Target packages"
 
 source "$BR2_EXTERNAL_SVEYRET_PATH/package/duniter/Config.in"
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/gecogvidanto/Config.in"
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/incron/Config.in"
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/init-rootfs-rotate/Config.in"
+source "$BR2_EXTERNAL_SVEYRET_PATH/package/nullmailer/Config.in"
 source "$BR2_EXTERNAL_SVEYRET_PATH/package/pam-krb5/Config.in"
 
 endmenu

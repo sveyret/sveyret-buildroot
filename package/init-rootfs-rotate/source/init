@@ -1,0 +1,71 @@
+#!/bin/busybox sh
+# The provided root will be actually used as the writable filesystem where we will search for:
+# * the read-only root FS;
+# * the new read-only root FS, if any;
+# * the directories “/upper” and “/work” to mount to overlay FS.
+# If the new read-only root FS is present, it will be used to replace the old one.
+# The name of the new root FS is provided using new_root=xxx.
+
+set -e
+
+# Error in init script, most probably because of bad parameters
+onError() {
+	echo "Initialization error - Check kernel parameters"
+	while true; do /bin/busybox sleep 10000; done
+}
+trap onError EXIT
+
+# Mount basic fs
+mount -n -t proc proc /proc
+mount -n -t devtmpfs devtmpfs /dev
+mount -n -t sysfs sysfs /sys
+
+# Read parameters
+init=/sbin/init
+root=
+rootfstype=auto
+rootflags=
+rootdelay=
+rootwait=false
+new_root=
+read -r cmdline </proc/cmdline
+for param in ${cmdline}; do
+	case $param in
+		init=*) init=${param#init=} ;;
+		root=*) root=${param#root=} ;;
+		rootfstype=*) rootfstype=${param#rootfstype=} ;;
+		rootflags=*) rootflags=${param#rootflags=} ;;
+		rootdelay=*) rootdelay=${param#rootdelay=} ;;
+		rootwait) rootwait=true ;;
+		new_root=*) new_root=${param#new_root=} ;;
+	esac
+done
+
+# Mount writable filesystem (provided root)
+[ -n "${rootdelay}" ] && sleep "${rootdelay}"
+device=$(findfs ${root})
+while ${rootwait} && ! [ -b "${device}" ]; do sleep 1; done
+mount -n -t "${rootfstype}" -o "${rootflags}" ${device} /mnt/saved
+
+# Swap readonly filesystem, if needed and mount it
+if [ -n "${new_root}" ]; then
+	if [ -f "/mnt/saved/${new_root}" ]; then
+		echo "Rotating root FS"
+		rm -f /mnt/saved/rootfs.squashfs
+		mv "/mnt/saved/${new_root}" /mnt/saved/rootfs.squashfs
+	fi
+fi
+mount -n -t squashfs -o loop,ro,nodev,noexec /mnt/saved/rootfs.squashfs /mnt/base
+
+# Assemble filesystems to create real root
+[ -d /mnt/saved/upper ] || mkdir -p /mnt/saved/upper
+[ -d /mnt/saved/work ] || mkdir -p /mnt/saved/work
+mount -t overlay -o lowerdir=/mnt/base,upperdir=/mnt/saved/upper,workdir=/mnt/saved/work overlay /mnt/root
+
+# Clean up
+umount /sys
+umount /dev
+umount /proc
+
+# Give process to real init
+exec switch_root /mnt/root ${init}

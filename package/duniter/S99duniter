@@ -11,13 +11,12 @@ PID_FILE="/var/run/${NAME}.pid"
 
 DUNITER_GROUP=duniter
 DUNITER_USER=duniter
-DUNITER_HOME=/var/lib/duniter/.config/duniter
+DUNITER_HOME=/var/db/duniter/.config/duniter
 DUNITER_DATA=duniter_default
 
 # Read configuration variable file if it is present
 [ -r "${CFG_FILE}" ] && . "${CFG_FILE}"
 
-command="/usr/bin/duniter"
 if [ -n "${DUNITER_WEB}" ]; then
 	command_args="webstart"
 	if [ ! -z ${DUNITER_WEB_HOST} ]; then
@@ -42,13 +41,12 @@ case "$1" in
 	;;
   stop)
 	echo "Stopping duniter..."
-	${command} stop --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}"
-	rm "${PID_FILE}"
+	${DAEMON} stop --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}"
 	;;
   restart)
 	"$0" stop
 	"$0" start
 	;;
   *)
-	${command} "${1}" --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}"
+	${DAEMON} --home "${DUNITER_HOME}" --mdb "${DUNITER_DATA}" "${@}"
 esac
